@@ -16,5 +16,5 @@ public class OrderItem
         return Product.Price * Quantity;
     }
 
-    public override string ToString() => $"{Product.Name} * {Quantity} = {GetTotalPrice():N2} ₽";
+    public override string ToString() => $"{Product.Name} * {Quantity} = {GetTotalPrice():N2} руб.";
 }

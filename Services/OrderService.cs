@@ -7,6 +7,8 @@ public class OrderService
     private readonly List<Order> _orders = new();
     private int _nextOrderId = 1;
 
+    #region Public Methods
+
     public IReadOnlyCollection<Order> GetAllOrders() => _orders;
 
     public Order GetOrderById(int orderId)
@@ -54,13 +56,13 @@ public class OrderService
         _orders.Add(order);
     }
     
-    public IReadOnlyCollection<Product> GetTopProducts(int count)
+    public IReadOnlyCollection<(string NameProduct, int TotalQuantity)> GetTopProducts(int count)
     {
         if (count <= 0)
             throw new ArgumentOutOfRangeException(nameof(count), "Количество должно быть положительным числом");
 
         if (_orders.Count is 0)
-            return new List<Product>();
+            return new List<(string NameProduct, int TotalQuantity)>();
 
         return _orders
             .SelectMany(order => order.Items)
@@ -68,7 +70,7 @@ public class OrderService
             .Select(group => (Product: group.Key, TotalQuantity: group.Sum(item => item.Quantity)))
             .OrderByDescending(x => x.TotalQuantity)
             .Take(count)
-            .Select(x => x.Product)
+            .Select(x => (NameProduct: x.Product.Name, x.TotalQuantity))
             .ToList();
     }
     
@@ -77,6 +79,10 @@ public class OrderService
         var order = GetOrderById(orderId);
         return _orders.Remove(order);
     }
+
+    #endregion
+
+    #region Private Methods
 
     private void ValidateOrdersCollection()
     {
@@ -88,4 +94,6 @@ public class OrderService
                 throw new InvalidOperationException("Коллекция заказов пуста.");
         }
     }
+
+    #endregion
 }
