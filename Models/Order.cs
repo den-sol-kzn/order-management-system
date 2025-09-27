@@ -12,6 +12,12 @@ public class Order
 
     #region Constructors
 
+    public Order()
+    {
+        DateCreated = DateTime.Now;
+        Items = new List<OrderItem>();
+    }
+
     public Order(int id)
     {
         Id = id;
