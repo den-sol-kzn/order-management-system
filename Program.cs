@@ -1,4 +1,6 @@
 ﻿using order_management_system.Models;
+using order_management_system.Repositories;
+using order_management_system.Repositories.Interfaces;
 using order_management_system.Services;
 
 namespace order_management_system;
@@ -10,7 +12,8 @@ public class Program
         try
         {
             // 1. Инициализация сервиса и товаров
-            var orderService = new OrderService();
+            IOrderRepository repository = new OrderRepository();
+            var orderService = new OrderService(repository);
             var monoBlock = new Product(1, "Моноблок", 27800m);
             var mouse = new Product(2, "Компьютерная мышь", 1450m);
             var keyboard = new Product(3, "Клавиатура", 2325m);

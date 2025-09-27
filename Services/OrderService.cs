@@ -1,25 +1,23 @@
 ﻿using order_management_system.Models;
+using order_management_system.Repositories.Interfaces;
 
 namespace order_management_system.Services;
 
 public class OrderService
 {
-    private readonly List<Order> _orders = new();
-    private int _nextOrderId = 1;
+    private readonly IOrderRepository _orderRepository;
 
-    #region Public Methods
-
-    public IReadOnlyCollection<Order> GetAllOrders() => _orders;
+    public OrderService(IOrderRepository orderRepository)
+    {
+        _orderRepository = orderRepository ?? throw new ArgumentNullException(nameof(orderRepository));
+    }
 
     public Order GetOrderById(int orderId)
     {
         if (orderId <= 0)
             throw new ArgumentOutOfRangeException(nameof(orderId), "ID заказа должен быть положительным числом");
 
-        ValidateOrdersCollection();
-
-        return _orders.FirstOrDefault(o => o.Id == orderId)
-               ?? throw new KeyNotFoundException($"Заказ с ID {orderId} не найден");
+        return _orderRepository.GetOrder(orderId);
     }
 
     public List<Order> GetOrdersInRange(DateTime from, DateTime to)
@@ -27,10 +25,8 @@ public class OrderService
         if (from > to)
             throw new ArgumentException($"Начальная дата ({from:g}) не может быть больше конечной ({to:g}).");
 
-        ValidateOrdersCollection();
-
-        return _orders
-            .Where(order => order.DateCreated >= from && order.DateCreated <= to)
+        return _orderRepository
+            .GetOrdersByDateRange(from, to)
             .OrderByDescending(order => order.DateCreated)
             .ThenBy(order => order.Id)
             .ToList();
@@ -42,18 +38,8 @@ public class OrderService
 
         if (order.IsEmpty())
             throw new InvalidOperationException("Невозможно разместить пустой заказ");
-
-        if (order.Id is 0)
-        {
-            order.Id = _nextOrderId++;
-        }
-
-        if (order.DateCreated == default)
-        {
-            order.DateCreated = DateTime.Now;
-        }
-
-        _orders.Add(order);
+        
+        _orderRepository.AddOrder(order);
     }
     
     public IReadOnlyCollection<(string NameProduct, int TotalQuantity)> GetTopProducts(int count)
@@ -61,10 +47,12 @@ public class OrderService
         if (count <= 0)
             throw new ArgumentOutOfRangeException(nameof(count), "Количество должно быть положительным числом");
 
-        if (_orders.Count is 0)
+        var allOrders = _orderRepository.GetOrders();
+
+        if (allOrders.Count is 0)
             return new List<(string NameProduct, int TotalQuantity)>();
 
-        return _orders
+        return allOrders
             .SelectMany(order => order.Items)
             .GroupBy(item => item.Product)
             .Select(group => (Product: group.Key, TotalQuantity: group.Sum(item => item.Quantity)))
@@ -73,27 +61,13 @@ public class OrderService
             .Select(x => (NameProduct: x.Product.Name, x.TotalQuantity))
             .ToList();
     }
-    
+
     public bool CancelOrder(int orderId)
     {
         var order = GetOrderById(orderId);
-        return _orders.Remove(order);
+
+        ArgumentNullException.ThrowIfNull(order);
+
+        return _orderRepository.RemoveOrder(order);
     }
-
-    #endregion
-
-    #region Private Methods
-
-    private void ValidateOrdersCollection()
-    {
-        switch (_orders)
-        {
-            case null:
-                throw new InvalidOperationException("Коллекция заказов не инициализирована.");
-            case { Count: 0 }:
-                throw new InvalidOperationException("Коллекция заказов пуста.");
-        }
-    }
-
-    #endregion
 }
