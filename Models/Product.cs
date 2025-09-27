@@ -13,5 +13,5 @@ public class Product
         Price = price;
     }
 
-    public override string ToString() => $"{Name} ({Price} ₽)";
+    public override string ToString() => $"{Name} ({Price} руб.)";
 }

@@ -41,7 +41,7 @@ public class Order
         ArgumentNullException.ThrowIfNull(product);
 
         if (quantity <= 0)
-            throw new ArgumentException("Количество должно быть положительным числом", nameof(quantity));
+            throw new ArgumentOutOfRangeException(nameof(quantity), "Количество должно быть положительным числом");
 
         var existingItem = FindItemByProductId(product.Id);
 
@@ -78,7 +78,7 @@ public class Order
 
         if (existingItem is null) return false;
 
-        if (newQuantity == 0)
+        if (newQuantity is 0)
         {
             return RemoveItem(productId);
         }
@@ -94,7 +94,7 @@ public class Order
 
     public bool IsEmpty()
     {
-        return Items.Count == 0;
+        return Items.Count is 0;
     }
 
     public void Clear()
@@ -112,7 +112,7 @@ public class Order
         return Items.Count;
     }
 
-    public override string ToString() => $"Order #{Id} | Date: {DateCreated:g} | Items: {GetUniqueProductsCount()} | Total: {GetTotalAmount()} ₽";
+    public override string ToString() => $"Заказ #{Id} | Дата: {DateCreated:g} | Товары: {GetUniqueProductsCount()} | Итоговая сумма: {GetTotalAmount()} руб.";
 
     #endregion
 
