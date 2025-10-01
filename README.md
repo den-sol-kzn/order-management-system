@@ -37,19 +37,21 @@
 
 📁 **Структура проекта**
 
-order-management-system/  
-- Models/  
-  + Order.cs  
-  + OrderItem.cs  
-  + Product.cs  
-- Services/  
-  + OrderService.cs  
-- Repositories/  
-  + Interfaces/  
-    * IOrderRepository.cs  
-  + OrderRepository.cs  
-- Program.cs  
-- README.md
+```
+order-management-system/
+├── Models/
+│   ├── Order.cs
+│   ├── OrderItem.cs
+│   └── Product.cs
+├── Services/
+│   └── OrderService.cs
+├── Repositories/
+│   ├── Interfaces/
+│   │   └── IOrderRepository.cs
+│   └── OrderRepository.cs
+├── Program.cs
+└── README.md
+```
 
 🏃 **Запуск проекта**
 
@@ -74,7 +76,7 @@ order-management-system/
 
   ```bash
   // Создание сервиса
-  var repository = new InMemoryOrderRepository();
+  var repository = new OrderRepository();
   var orderService = new OrderService(repository);
 
   // Создание товаров
